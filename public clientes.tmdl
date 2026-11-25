@@ -1,0 +1,63 @@
+table 'public clientes'
+	lineageTag: 3bd76bbc-cd37-4c4b-881e-668a7d9312ad
+
+	column cliente_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 5f6a848b-56c9-4126-b172-f06d54874a60
+		summarizeBy: none
+		sourceColumn: cliente_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column nombre
+		dataType: string
+		lineageTag: b5091d59-aca9-40da-ad03-1b2ab71e4170
+		summarizeBy: none
+		sourceColumn: nombre
+
+		annotation SummarizationSetBy = Automatic
+
+	column segmento
+		dataType: string
+		lineageTag: f4ff3e44-cb54-4906-8e5c-6f56ca338e8e
+		summarizeBy: none
+		sourceColumn: segmento
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_registro
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 24790272-32c7-4732-9911-0fe1c93a1ab7
+		summarizeBy: none
+		sourceColumn: fecha_registro
+
+		variation Variación
+			isDefault
+			relationship: c94e19e8-7c6e-486d-9b9b-9e0619623cb9
+			defaultHierarchy: LocalDateTable_fdb203ab-1025-44a1-ad8d-9dc5d3ebeca7.'Jerarquía de fechas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition 'public clientes' = m
+		mode: import
+		source =
+				// Consulta: public clientes
+				let
+				  Origen = PostgreSQL.Database("ep-twilight-water-bewet8tx-pooler.c-9.us-east-2.aws.neon.tech", "internet"),
+				  Datos = Origen{[Schema = "public", Item = "clientes"]}[Data],
+				  LimpiarTexto = (v, vacio) =>
+				    let t = if v = null then "" else Text.Trim(Text.From(v))
+				    in if t = "" or Text.Lower(t) = "n/a" then vacio else t,
+				  Nombre = Table.TransformColumns(Datos, {{"nombre", each LimpiarTexto(_, "Sin nombre"), type text}}),
+				  Segmento = Table.TransformColumns(Nombre, {{"segmento", each let s = LimpiarTexto(_, "Sin segmento") in if s = "Frequente" then "Frecuente" else s, type text}})
+				in
+				  Segmento
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

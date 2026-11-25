@@ -1,0 +1,87 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 50.000000000000014,
+            "y": 596.80846537914215
+          },
+          "nodeIndex": "public catalogo",
+          "nodeLineageTag": "bc0ee51d-cfe4-4325-9e3c-2ac5ceedc60d",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 710.93951205096664,
+            "y": 300.55996018384951
+          },
+          "nodeIndex": "public clientes",
+          "nodeLineageTag": "3bd76bbc-cd37-4c4b-881e-668a7d9312ad",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 244.90105882719971,
+            "y": 320.13163338692522
+          },
+          "nodeIndex": "public detalle_operacion",
+          "nodeLineageTag": "5f46fda7-ced9-40e6-af06-80a861a7c685",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 425.88786292732954,
+            "y": 19.061499941553961
+          },
+          "nodeIndex": "public operaciones",
+          "nodeLineageTag": "9e24144a-b5c2-41cc-ae38-f2291e2c94d9",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 140.096622951805,
+            "y": -50
+          },
+          "nodeIndex": "public sedes",
+          "nodeLineageTag": "7f90026d-389b-471c-908e-fde49ff5ff7a",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "Todas las tablas",
+      "zoomValue": 89.192590520569482,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "Todas las tablas",
+  "defaultDiagram": "Todas las tablas"
+}

@@ -1,0 +1,60 @@
+table 'public catalogo'
+	lineageTag: bc0ee51d-cfe4-4325-9e3c-2ac5ceedc60d
+
+	column producto_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 676e6ff6-7ed5-49e5-ac12-073cb04d0443
+		summarizeBy: none
+		sourceColumn: producto_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column nombre
+		dataType: string
+		lineageTag: 6626da41-e89e-4842-b1d9-b3c67352fe6c
+		summarizeBy: none
+		sourceColumn: nombre
+
+		annotation SummarizationSetBy = Automatic
+
+	column categoria
+		dataType: string
+		lineageTag: 30cfbc82-0ea2-428e-bc7a-7d8f84793f0d
+		summarizeBy: none
+		sourceColumn: categoria
+
+		annotation SummarizationSetBy = Automatic
+
+	column precio_lista
+		dataType: double
+		lineageTag: 1707e655-cb60-4283-914e-fb04d1e0519f
+		summarizeBy: none
+		sourceColumn: precio_lista
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition 'public catalogo' = m
+		mode: import
+		source =
+				// Consulta: public catalogo
+				let
+				  Origen = PostgreSQL.Database("ep-twilight-water-bewet8tx-pooler.c-9.us-east-2.aws.neon.tech", "internet"),
+				  Datos = Origen{[Schema = "public", Item = "catalogo"]}[Data],
+				  LimpiarNombre = (v) =>
+				    let t = if v = null then "" else Text.Trim(Text.From(v))
+				    in if t = "" or Text.Lower(t) = "n/a" then "Sin nombre" else t,
+				  LimpiarCategoria = (v) =>
+				    let t = if v = null then "" else Text.Trim(Text.From(v))
+				    in if t = "" then "Sin categoría" else t,
+				  Texto = Table.TransformColumns(Datos, {{"nombre", LimpiarNombre, type text}, {"categoria", LimpiarCategoria, type text}}),
+				  Precio = Table.TransformColumns(Texto, {{"precio_lista", each if _ = null or _ < 0 then 0 else _, type number}})
+				in
+				  Precio
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

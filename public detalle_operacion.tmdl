@@ -1,0 +1,103 @@
+table 'public detalle_operacion'
+	lineageTag: 5f46fda7-ced9-40e6-af06-80a861a7c685
+
+	measure 'Importe completado' =
+			
+			CALCULATE(
+			    SUMX(
+			        'public detalle_operacion',
+			        IF(
+			            NOT ISBLANK('public detalle_operacion'[cantidad]) && NOT ISBLANK('public detalle_operacion'[precio_unitario]),
+			            'public detalle_operacion'[cantidad] * 'public detalle_operacion'[precio_unitario] - 'public detalle_operacion'[descuento]
+			        )
+			    ),
+			    'public operaciones'[estado] = "completada"
+			)
+		lineageTag: 5c68a4af-a57d-4a2a-b4b7-da1f2cafbbc1
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Número de operaciones' = DISTINCTCOUNT('public operaciones'[operacion_id])
+		formatString: 0
+		lineageTag: 74a99af8-ba45-48db-b2b6-038435cb6b07
+
+	column detalle_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 9f21f968-4058-42a9-9f0d-3d2d13d8570e
+		summarizeBy: sum
+		sourceColumn: detalle_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column operacion_id
+		dataType: int64
+		formatString: 0
+		lineageTag: f381f939-9990-4287-bb4d-c02112a31a34
+		summarizeBy: none
+		sourceColumn: operacion_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column producto_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 43c19229-d03e-4fca-8abc-5f26fc371106
+		summarizeBy: none
+		sourceColumn: producto_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column cantidad
+		dataType: double
+		lineageTag: fb8390c6-68f3-4ac2-867d-eb77fe7b723a
+		summarizeBy: sum
+		sourceColumn: cantidad
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column precio_unitario
+		dataType: double
+		lineageTag: 8c246f72-9be9-4a7d-a764-790af3eab060
+		summarizeBy: sum
+		sourceColumn: precio_unitario
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column descuento
+		dataType: double
+		lineageTag: efbde05e-2faa-49ff-8248-0c222dbe35f5
+		summarizeBy: sum
+		sourceColumn: descuento
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition 'public detalle_operacion' = m
+		mode: import
+		source =
+				// Consulta: public detalle_operacion
+				let
+				  Origen = PostgreSQL.Database("ep-twilight-water-bewet8tx-pooler.c-9.us-east-2.aws.neon.tech", "internet"),
+				  Datos = Table.Buffer(Origen{[Schema = "public", Item = "detalle_operacion"]}[Data]),
+				  Cantidad = Table.TransformColumns(Datos, {{"cantidad", each if _ = null or _ <= 0 or _ >= 99999 then null else _, type nullable number}}),
+				  Precio = Table.TransformColumns(Cantidad, {{"precio_unitario", each if _ = null or _ < 0 or _ >= 999999 then null else _, type nullable number}}),
+				  DescuentoOk = Table.AddColumn(Precio, "descuento_ok", each
+				    let subtotal = [cantidad] * [precio_unitario]
+				    in if [descuento] = null or [descuento] < 0 then 0
+				       else if subtotal <> null and [descuento] > subtotal then 0
+				       else [descuento], type number),
+				  Quitar = Table.RemoveColumns(DescuentoOk, {"descuento"}),
+				  Resultado = Table.RenameColumns(Quitar, {{"descuento_ok", "descuento"}})
+				in
+				  Resultado
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

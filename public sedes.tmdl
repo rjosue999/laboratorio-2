@@ -1,0 +1,42 @@
+table 'public sedes'
+	lineageTag: 7f90026d-389b-471c-908e-fde49ff5ff7a
+
+	column sede_id
+		dataType: int64
+		formatString: 0
+		lineageTag: b6b49d1c-2bd1-4e4e-a69f-dd562f17a71b
+		summarizeBy: none
+		sourceColumn: sede_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column nombre
+		dataType: string
+		lineageTag: 327d5baa-40bf-4a15-b208-16b4e17f656d
+		summarizeBy: none
+		sourceColumn: nombre
+
+		annotation SummarizationSetBy = Automatic
+
+	column ciudad
+		dataType: string
+		lineageTag: add4f74e-8d0a-40f2-8312-a8008e7df151
+		summarizeBy: none
+		sourceColumn: ciudad
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'public sedes' = m
+		mode: import
+		source =
+				// Consulta: public sedes (no necesitó limpieza)
+				let
+				  Origen = PostgreSQL.Database("ep-twilight-water-bewet8tx-pooler.c-9.us-east-2.aws.neon.tech", "internet"),
+				  Datos = Origen{[Schema = "public", Item = "sedes"]}[Data]
+				in
+				  Datos
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

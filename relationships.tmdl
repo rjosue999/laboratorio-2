@@ -1,0 +1,31 @@
+relationship c94e19e8-7c6e-486d-9b9b-9e0619623cb9
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'public clientes'.fecha_registro
+	toColumn: LocalDateTable_fdb203ab-1025-44a1-ad8d-9dc5d3ebeca7.Date
+
+relationship d94bc4f5-e9c6-4c15-b839-88d958b9434f
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'public operaciones'.fecha
+	toColumn: LocalDateTable_1e0cf8eb-1784-4592-b413-167dd5122556.Date
+
+relationship 791187b9-e212-4b3e-a37b-356f95143a6e
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'public operaciones'.actualizado_en
+	toColumn: LocalDateTable_4a750579-3e70-4481-b4e5-061940636552.Date
+
+relationship AutoDetected_d23c47f2-f980-442e-a50b-6e8f2af79a5c
+	fromColumn: 'public detalle_operacion'.producto_id
+	toColumn: 'public catalogo'.producto_id
+
+relationship AutoDetected_6677b116-a58b-4557-b7d8-9778b82167de
+	fromColumn: 'public operaciones'.cliente_id
+	toColumn: 'public clientes'.cliente_id
+
+relationship AutoDetected_0bb3aed7-9370-4757-baed-7f9efed6e30b
+	fromColumn: 'public detalle_operacion'.operacion_id
+	toColumn: 'public operaciones'.operacion_id
+
+relationship AutoDetected_61e96071-fdbb-4eb9-bac8-460858f527aa
+	fromColumn: 'public operaciones'.sede_id
+	toColumn: 'public sedes'.sede_id
+

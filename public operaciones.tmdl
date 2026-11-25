@@ -1,0 +1,108 @@
+table 'public operaciones'
+	lineageTag: 9e24144a-b5c2-41cc-ae38-f2291e2c94d9
+
+	column operacion_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 22a50be1-0a58-4e73-85e5-6480c4492004
+		summarizeBy: none
+		sourceColumn: operacion_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column cliente_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 7026665e-988f-4701-9cdf-0d5f7e49949e
+		summarizeBy: none
+		sourceColumn: cliente_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column sede_id
+		dataType: int64
+		formatString: 0
+		lineageTag: a6534cf2-5d55-40a4-949c-995b172425c2
+		summarizeBy: none
+		sourceColumn: sede_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 678dcaaa-bfa7-4377-bcba-114ca9a35c29
+		summarizeBy: none
+		sourceColumn: fecha
+
+		variation Variación
+			isDefault
+			relationship: d94bc4f5-e9c6-4c15-b839-88d958b9434f
+			defaultHierarchy: LocalDateTable_1e0cf8eb-1784-4592-b413-167dd5122556.'Jerarquía de fechas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column estado
+		dataType: string
+		lineageTag: 9466263c-c813-47cb-b565-25ec8ebfc911
+		summarizeBy: none
+		sourceColumn: estado
+
+		annotation SummarizationSetBy = Automatic
+
+	column canal
+		dataType: string
+		lineageTag: 623d62c8-92b7-433d-91c1-a49f2457cfd0
+		summarizeBy: none
+		sourceColumn: canal
+
+		annotation SummarizationSetBy = Automatic
+
+	column actualizado_en
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 4fcc571d-9459-496b-a822-9ad8509698d5
+		summarizeBy: none
+		sourceColumn: actualizado_en
+
+		variation Variación
+			isDefault
+			relationship: 791187b9-e212-4b3e-a37b-356f95143a6e
+			defaultHierarchy: LocalDateTable_4a750579-3e70-4481-b4e5-061940636552.'Jerarquía de fechas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Año Mes' =
+			
+			VAR f = 'public operaciones'[fecha]
+			RETURN
+			IF(ISBLANK(f) || f < DATE(2020,1,1) || f > TODAY(), BLANK(), FORMAT(f, "yyyy-mm"))
+		lineageTag: f6159be9-2ee5-404e-a0e1-ec9e11abe7c0
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'public operaciones' = m
+		mode: import
+		source =
+				// Consulta: public operaciones
+				let
+				  Origen = PostgreSQL.Database("ep-twilight-water-bewet8tx-pooler.c-9.us-east-2.aws.neon.tech", "internet"),
+				  Datos = Table.Buffer(Origen{[Schema = "public", Item = "operaciones"]}[Data]),
+				  LimpiarEstado = (v) =>
+				    let t = Text.Lower(Text.Trim(if v = null then "" else Text.From(v)))
+				    in if t = "" or t = "???" or t = "estado desconocido" or t = "vacio" or t = "vacío" or t = "(en blanco)" then "sin estado" else t,
+				  LimpiarCanal = (v) =>
+				    let t = Text.Lower(Text.Trim(if v = null then "" else Text.From(v)))
+				    in if t = "" or t = "??" or t = "vacio" or t = "vacío" or t = "n/a" or t = "sin estado" then "sin canal"
+				       else if t = "tienda" then "presencial"
+				       else if t = "web" or t = "app" or t = "app??" or t = "digtal" then "digital"
+				       else t,
+				  Resultado = Table.TransformColumns(Datos, {{"estado", LimpiarEstado, type text}, {"canal", LimpiarCanal, type text}})
+				in
+				  Resultado
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+
